@@ -49,7 +49,7 @@ public class BankAccount {
 
 	public BankAccount(int accountNumber, double balance, double withdrawLimit, String dateCreated,
 			String accountHolder) throws Exception {
-		Person person = new Person(accountHolder);
+		Person Person = new Person(accountHolder);
 		initMoneyAmount = 0;
 		this.withdrawLimit = withdrawLimit;
 		this.balance = balance;
@@ -178,9 +178,9 @@ public class BankAccount {
 				String newHairColor = fileScanner.next();
 				String newEyeColor = fileScanner.next();
 				String newEmail = fileScanner.next();
-				String accountHolder1 = newName + person.DELIM + gender + person.DELIM + newAge + person.DELIM
-						+ newHeight + person.DELIM + newWeight + person.DELIM + newHairColor + person.DELIM
-						+ newEyeColor + person.DELIM + newEmail;
+				String accountHolder1 = newName + Person.DELIM + gender + Person.DELIM + newAge + Person.DELIM
+						+ newHeight + Person.DELIM + newWeight + Person.DELIM + newHairColor + Person.DELIM
+						+ newEyeColor + Person.DELIM + newEmail;
 				Person accountHolderManager = new Person(accountHolder1);
 				tmpAccount.setAccountHolder(accountHolderManager);
 				accountsLoaded = accManager.addAccount(tmpAccount, 1);
@@ -216,8 +216,8 @@ public class BankAccount {
 
 	public String convertToText(BankAccount tmp) {
 
-		String AccountsInfo =  tmp.getAccountNumber() + person.DELIM + tmp.getBalance() + person.DELIM
-				+ tmp.getWithdrawLimit() + person.DELIM + tmp.getDateCreated() + person.DELIM + tmp.getAccountHolder();
+		String AccountsInfo =  tmp.getAccountNumber() + Person.DELIM + tmp.getBalance() + Person.DELIM
+				+ tmp.getWithdrawLimit() + Person.DELIM + tmp.getDateCreated() + Person.DELIM + tmp.getAccountHolder();
 		// allAccountInfo += AccountsInfo;
 
 		return AccountsInfo;
