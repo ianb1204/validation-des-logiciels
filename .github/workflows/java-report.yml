@@ -1,0 +1,77 @@
+name: Java Report for BankApplication
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  java-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate Java file report (and enforce rules)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          REPORT="java-file-report.txt"
+
+          # 1) Fail if any compiled *.class files are committed
+          #    (checks tracked files, not build output created during the workflow)
+          CLASS_FILES="$(git ls-files '*.class' || true)"
+          if [[ -n "${CLASS_FILES}" ]]; then
+            echo "ERROR: Compiled *.class files are committed to the repository (bad practice)."
+            echo "The following *.class files are tracked:"
+            echo "${CLASS_FILES}"
+            exit 1
+          fi
+
+          # 2) Find all *.java files in the working tree
+          #    (ignores .git directory; includes any Java files present in repo)
+          mapfile -t JAVA_FILES < <(find . -type f -name '*.java' -not -path './.git/*' | sort)
+
+          if [[ ${#JAVA_FILES[@]} -eq 0 ]]; then
+            echo "ERROR: No .java files found in the repository."
+            exit 1
+          fi
+
+          # 3) Generate report
+          # Header
+          {
+            echo "Java File Report"
+            echo "================"
+            echo
+            echo "Number of .java files: ${#JAVA_FILES[@]}"
+            echo
+            echo "Per-file breakdown (path – line_count):"
+          } > "${REPORT}"
+
+          # Per-file counts and totals
+          TOTAL_LINES=0
+          for f in "${JAVA_FILES[@]}"; do
+            # wc output can include leading spaces; normalize with awk
+            LINE_COUNT="$(wc -l < "$f" | awk '{print $1}')"
+            TOTAL_LINES=$((TOTAL_LINES + LINE_COUNT))
+            echo "${f#./} – ${LINE_COUNT}" >> "${REPORT}"
+          done
+
+          # Totals
+          {
+            echo
+            echo "Total lines of code across all .java files: ${TOTAL_LINES}"
+          } >> "${REPORT}"
+
+          echo "Report generated: ${REPORT}"
+          echo "----"
+          cat "${REPORT}"
+
+      - name: Upload java-file-report.txt artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-file-report
+          path: java-file-report.txt
+          if-no-files-found: error
